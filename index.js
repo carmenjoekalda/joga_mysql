@@ -1,6 +1,6 @@
 // application packages
 const express = require('express')
-const app= express()
+const app = express()
 
 const path = require('path')
 // add template engine
@@ -19,7 +19,7 @@ app.use(express.static('public'));
 const mysql = require('mysql')
 
 const bodyParser = require('body-parser')
-app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.urlencoded({ extended: true }))
 
 // create database connection
 var con = mysql.createConnection({
@@ -29,7 +29,7 @@ var con = mysql.createConnection({
     database: "joga_mysql"
 })
 
-con.connect(function(err) {
+con.connect(function (err) {
     if (err) throw err;
     console.log("Connected to joga_mysql db")
 })
@@ -44,21 +44,24 @@ app.get('/', (req, res) => {
         res.render('index', {
             articles: articles
         })
-    }) 
+    })
 });
 
 // show article by this slug
 app.get('/article/:slug', (req, res) => {
-    let query = `SELECT * FROM article WHERE slug="${req.params.slug}"`
-    let article
-    con.query(query, (err, result) => {
-        if (err) throw err;
-        article = result
-        console.log(article)
-        res.render('article', {
-            article: article
-        })
-    });
+    let query = `SELECT *,
+    article.name as article_name,
+    author.name as author_name
+    FROM article
+    INNER JOIN author
+    ON article.author_id = author.id WHERE slug = "${req.params.slug}"`;
+let article;
+con.query(query, (err, result) => {
+if (err) throw err;
+article = result;
+
+res.render('article', { article: article });
+})
 });
 
 // app start point
